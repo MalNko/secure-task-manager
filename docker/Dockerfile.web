@@ -1,0 +1,22 @@
+FROM node:18-alpine AS build
+WORKDIR /app
+
+# Copy everything from the Web folder (context is already in Web folder)
+COPY . .
+
+# Install and build
+RUN npm install
+RUN npm run build
+
+# Production stage
+FROM nginx:alpine
+WORKDIR /usr/share/nginx/html
+
+# Copy built files
+COPY --from=build /app/build .
+
+# Copy nginx config (it's in the same folder as the context)
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 3000
+CMD ["nginx", "-g", "daemon off;"]
