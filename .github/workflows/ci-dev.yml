@@ -1,0 +1,51 @@
+name: CI - Development
+
+on:
+  push:
+    branches: [ dev, develop ]
+  pull_request:
+    branches: [ dev, develop ]
+
+jobs:
+  build-and-test-api:
+    runs-on: ubuntu-latest
+    name: Build & Test API
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore src/SecureTaskManager.API/SecureTaskManager.API.csproj
+    
+    - name: Build
+      run: dotnet build src/SecureTaskManager.API/SecureTaskManager.API.csproj --configuration Release --no-restore
+    
+    - name: Test
+      run: dotnet test tests/SecureTaskManager.Tests/SecureTaskManager.Tests.csproj --no-build --verbosity normal
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    name: Build Frontend
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: src/SecureTaskManager.Web/package-lock.json
+    
+    - name: Install dependencies
+      working-directory: src/SecureTaskManager.Web
+      run: npm ci
+    
+    - name: Build
+      working-directory: src/SecureTaskManager.Web
+      run: npm run build
