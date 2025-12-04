@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { getTasks, createTask, updateTask, deleteTask } from '../services/api';
 import TaskForm from './TaskForm';
 import './TaskList.css';
@@ -9,11 +9,7 @@ function TaskList({ token }) {
   const [showForm, setShowForm] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
 
-  useEffect(() => {
-    fetchTasks();
-  }, []);
-
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     try {
       const data = await getTasks(token);
       setTasks(data);
@@ -22,7 +18,11 @@ function TaskList({ token }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
 
   const handleCreateTask = async (taskData) => {
     try {
